@@ -1793,6 +1793,22 @@ void update_pv(Move* pv, Move move, const Move* childPv) {
     *pv = Move::none();
 }
 
+int tune1 = 142, tune2 = 88, tune3 = 1501, tune4 = 318, tune5 = 757, tune6 = 172, tune7 = 2848,
+    tune8 = 30, tune9 = 1054, tune10 = 1388, tune11 = 1235, tune12 = 595, tune13 = 1354;
+
+TUNE(tune1,
+     tune2,
+     tune3,
+     tune4,
+     tune5,
+     tune6,
+     tune7,
+     tune8,
+     tune9,
+     tune10,
+     tune11,
+     tune12,
+     tune13);
 
 // Updates stats at the end of search() when a bestMove is found
 void update_all_stats(const Position& pos,
@@ -1810,35 +1826,35 @@ void update_all_stats(const Position& pos,
     Piece                  movedPiece     = pos.moved_piece(bestMove);
     PieceType              capturedPiece;
 
-    int bonus = std::min(142 * depth - 88, 1501) + 318 * (bestMove == ttMove);
-    int malus = std::min(757 * depth - 172, 2848) - 30 * moveCount;
+    int bonus = std::min(tune1 * depth - tune2, tune3) + tune4 * (bestMove == ttMove);
+    int malus = std::min(tune5 * depth - tune6, tune7) - tune8 * moveCount;
 
     if (!pos.capture_stage(bestMove))
     {
-        update_quiet_histories(pos, ss, workerThread, bestMove, bonus * 1054 / 1024);
+        update_quiet_histories(pos, ss, workerThread, bestMove, bonus * tune9 / 1024);
 
         // Decrease stats for all non-best quiet moves
         for (Move move : quietsSearched)
-            update_quiet_histories(pos, ss, workerThread, move, -malus * 1388 / 1024);
+            update_quiet_histories(pos, ss, workerThread, move, -malus * tune10 / 1024);
     }
     else
     {
         // Increase stats for the best move in case it was a capture move
         capturedPiece = type_of(pos.piece_on(bestMove.to_sq()));
-        captureHistory[movedPiece][bestMove.to_sq()][capturedPiece] << bonus * 1235 / 1024;
+        captureHistory[movedPiece][bestMove.to_sq()][capturedPiece] << bonus * tune11 / 1024;
     }
 
     // Extra penalty for a quiet early move that was not a TT move in
     // previous ply when it gets refuted.
     if (prevSq != SQ_NONE && ((ss - 1)->moveCount == 1 + (ss - 1)->ttHit) && !pos.captured_piece())
-        update_continuation_histories(ss - 1, pos.piece_on(prevSq), prevSq, -malus * 595 / 1024);
+        update_continuation_histories(ss - 1, pos.piece_on(prevSq), prevSq, -malus * tune12 / 1024);
 
     // Decrease stats for all non-best capture moves
     for (Move move : capturesSearched)
     {
         movedPiece    = pos.moved_piece(move);
         capturedPiece = type_of(pos.piece_on(move.to_sq()));
-        captureHistory[movedPiece][move.to_sq()][capturedPiece] << -malus * 1354 / 1024;
+        captureHistory[movedPiece][move.to_sq()][capturedPiece] << -malus * tune13 / 1024;
     }
 }
 
